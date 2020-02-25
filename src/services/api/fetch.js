@@ -22,37 +22,27 @@ function headersToObject(headers) {
     return headersObject
 }
 
-function makeRequst(method, url, params, nameController = url) {
+function makeRequest(method, url, params, nameController = url) {
     abortPreviousRequest(nameController)
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise( (resolve, reject) => {
         if (method === 'GET' && params) {
             url = mergeUrlAndParams(url, params)
         }
 
-        try {
-            const response = await fetch(url, {
-                method,
-                params,
-                signal: abortControllerList[nameController].signal,
-            })
-
-            const responseObject = {
-                headers: headersToObject(response.headers),
-                data: await response.json(),
-            }
-
-            resolve(responseObject)
-        } catch(err) {
-            if (err.name !== 'AbortError') {
-                reject(err)
-            }
-        }
+        fetch(url, {
+            method,
+            params,
+            signal: abortControllerList[nameController].signal
+        }).then(response => resolve({
+            headers: headersToObject(response.headers),
+            data: response.json(),
+        })).catch(reject)
     })
 }
 
 function get (url, params, nameController) {
-    return makeRequst('GET', url, params, nameController)
+    return makeRequest('GET', url, params, nameController)
 }
 
 export {

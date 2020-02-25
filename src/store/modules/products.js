@@ -1,4 +1,4 @@
-const API_ENDPOINT = 'https://jsonplaceholder.typicode.com/comments/'
+const API_ENDPOINT = 'https://jsonplaceholder.typicode.com/todos/'
 
 const state = {
 	products: []
@@ -19,6 +19,8 @@ const mutations = {
 	},
 
 	pushProducts(state, products) {
+		console.log('pushing to products:\n', products)
+
 		products.forEach(product => {
 			let foundProduct = state.products.find(storedProduct => product.id === storedProduct.id)
 
@@ -33,10 +35,11 @@ const mutations = {
 
 const actions = {
 	pullProducts({commit}) {
-		return new Promise((resolve, reject) => {
+		return new Promise( (resolve, reject) => {
 			fetch(API_ENDPOINT)
 				.then(response => response.json())
 				.then(json => {
+					console.log('pulled products:\n', json)
 					commit('pushProducts', json)
 					resolve(json)
 				}).catch(reject)

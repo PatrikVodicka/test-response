@@ -1,63 +1,64 @@
-const API_ENDPOINT = 'https://jsonplaceholder.typicode.com/comments/'
+import Vue from 'vue'
+
+function getProductById(id) {
+	return state.cartProducts.find(product => product.id === id)
+}
 
 const state = {
-	products: []
+	cartProducts: []
 }
 
 const getters = {
 	getProducts(state) {
-		return state.products
+		return state.cartProducts
 	}
 }
 
 const mutations = {
+	setCartProduct(state, product) {
+		let cartProduct = getProductById(product.id)
+
+		if (cartProduct) {
+			let cartProductIndex = state.cartProducts.indexOf(cartProduct)
+			let copy = product
+			copy.amount++
+
+			// dafuq
+			Vue.set(state.cartProducts, cartProductIndex, copy)
+		} else {
+			state.cartProducts.push(Object.assign(product, {amount: 1}))
+		}
+	},
+
 	pushProduct(state, product) {
-		let foundProduct = state.products.find(storedProduct => product.id === storedProduct.id)
+		let foundProduct = state.cartProducts.find(storedProduct => product.id === storedProduct.id)
 
 		if (foundProduct) {
-			foundProduct.amount++
+			Object.assign(foundProduct, product)
+			product.amount++
 		} else {
-			state.products.push(product)
+			state.cartProducts.push(Object.assign(product, {amount: 1}))
 		}
+
+		console.log('push product to cart:\n', product)
 	},
 
 	pushProducts(state, products) {
 		products.forEach(product => {
-			let foundProduct = state.products.find(storedProduct => product.id === storedProduct.id)
+			let foundProduct = state.cartProducts.find(storedProduct => product.id === storedProduct.id)
 
 			if (foundProduct) {
 				Object.assign(foundProduct, product)
 			} else {
-				state.products.push(product)
+				state.cartProducts.push(product)
 			}
 		})
 	}
 }
 
 const actions = {
-	addProduct( {commit}, id) {
-		return new Promise((resolve, reject) => {
-			fetch(API_ENDPOINT + id)
-				.then(response => response.json())
-				.then(product => {
-					commit('pushProduct', {
-						id: product.id,
-						postId: product.postId,
-						name: product.name,
-						email: product.email,
-						body: product.body,
-						amount: 1,
-					})
-					resolve({
-						id: product.id,
-						postId: product.postId,
-						name: product.name,
-						email: product.email,
-						body: product.body,
-						amount: 1,
-					})
-				}).catch(reject)
-		})
+	addProduct({commit}, product) {
+		commit('setCartProduct', product)
 	}
 }
 
